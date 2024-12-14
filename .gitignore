@@ -1,0 +1,15 @@
+# Fichiers sensibles
+.env
+
+# Environnements virtuels
+venv/
+__pycache__/
+
+# Configurations spécifiques au système
+*.log
+*.tmp
+.DS_Store
+
+# Caches et fichiers générés
+*.pyc
+*.pyo
