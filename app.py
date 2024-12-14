@@ -2,14 +2,27 @@ import streamlit as st
 import joblib
 import pandas as pd
 import requests
+import os
+from dotenv import load_dotenv
 
-# URL de l'API FastAPI (remplacez par l'URL en ligne si nécessaire)
-API_URL = "http://127.0.0.1:8000/custom_query"
+# Charger les variables d'environnement
+load_dotenv(dotenv_path=".env")
+
+# URL de l'API FastAPI
+API_URL = os.getenv("API_URL")
+
+if not API_URL:
+    st.error("L'URL de l'API (API_URL) n'est pas configurée. Vérifiez le fichier .env.")
+    st.stop()
 
 # Charger le modèle
 @st.cache_resource
 def load_model():
-    return joblib.load("salary_prediction_model.pkl")
+    try:
+        return joblib.load("salary_prediction_model.pkl")
+    except FileNotFoundError:
+        st.error("Le fichier salary_prediction_model.pkl est introuvable.")
+        st.stop()
 
 # Récupérer les données depuis l'API
 @st.cache_data
@@ -17,23 +30,36 @@ def fetch_cleaned_data_from_api():
     try:
         response = requests.get(API_URL)
         response.raise_for_status()
-        return pd.DataFrame(response.json())  # Convertir les données JSON en DataFrame
+        data = response.json()
+        
+        # Vérifier si les données sont sous forme de liste de dictionnaires
+        if not isinstance(data, list):
+            st.error("Format inattendu des données de l'API. Les données doivent être une liste.")
+            st.stop()
+
+        return pd.DataFrame(data)
     except requests.exceptions.RequestException as e:
         st.error(f"Erreur lors de la récupération des données depuis l'API : {e}")
+        st.stop()
+    except ValueError as e:
+        st.error(f"Erreur de conversion des données en DataFrame : {e}")
         st.stop()
 
 # Préparer les options utilisateur
 def prepare_options(data):
-    # Préparer les options pour les listes déroulantes
-    # Supprimer les doublons et créer une colonne combinée pour les options de sélection
-    rome_data_unique = data.drop_duplicates(subset=['rome_code', 'rome_label']).copy()
-    rome_data_unique['combined'] = rome_data_unique['rome_code'] + ' - ' + rome_data_unique['rome_label']
+    try:
+        # Supprimer les doublons et créer une colonne combinée pour les options de sélection
+        rome_data_unique = data.drop_duplicates(subset=['rome_code', 'rome_label']).copy()
+        rome_data_unique['combined'] = rome_data_unique['rome_code'] + ' - ' + rome_data_unique['rome_label']
 
-    contract_type_options = data['contract_type'].drop_duplicates().tolist()
-    experience_required_options = data['experience_required'].drop_duplicates().tolist()
-    experience_required_months_options = data['experience_required_months'].drop_duplicates().sort_values().tolist()
-    job_location_options = data['code_postal'].drop_duplicates().tolist()
-    return rome_data_unique, contract_type_options, experience_required_options, experience_required_months_options, job_location_options
+        contract_type_options = data['contract_type'].drop_duplicates().tolist()
+        experience_required_options = data['experience_required'].drop_duplicates().tolist()
+        experience_required_months_options = data['experience_required_months'].drop_duplicates().sort_values().tolist()
+        job_location_options = data['code_postal'].drop_duplicates().tolist()
+        return rome_data_unique, contract_type_options, experience_required_options, experience_required_months_options, job_location_options
+    except KeyError as e:
+        st.error(f"Les données retournées par l'API sont manquantes ou incorrectes : {e}")
+        st.stop()
 
 # Fonction principale pour l'application Streamlit
 def main():
@@ -84,7 +110,7 @@ def main():
 
             # Faire la prédiction
             prediction = model.predict(input_data)
-            st.write(f"Salaire Prévu : {prediction[0]:.2f} €")
+            st.success(f"Salaire Prévu : {prediction[0]:.2f} €")
         except Exception as e:
             st.error(f"Une erreur est survenue : {e}")
             st.write("Détails :", e)
