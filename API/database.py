@@ -8,8 +8,8 @@ load_dotenv(dotenv_path="../.env")
 
 #Chaine de connecion pour acceder a la base de données pour recupérer les informations metiers dont l'utilisateur aura besoin pour s'orienter
 # Base de données 1
-DATABASE_URL1 = os.getenv("DATABASE_URL")
-engine1 = create_engine(DATABASE_URL1)
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine1 = create_engine(DATABASE_URL)
 SessionLocal1 = sessionmaker(autocommit=False, autoflush=False, bind=engine1)
 Base1 = declarative_base()
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # Test connexion à la deuxième base de données
         with engine2.connect() as connection2:
             print("Connexion réussie à la base de données 2 !")
-            query2 = text("SELECT * FROM metrics LIMIT 5;")  # Remplacez `autre_table` par une table de la base 2
+            query2 = text("SELECT * FROM metrics LIMIT 2;")  # Remplacez `autre_table` par une table de la base 2
             result2 = connection2.execute(query2)
             print("Données récupérées de la base 2 :")
             for row in result2:
