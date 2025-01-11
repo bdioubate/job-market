@@ -61,23 +61,23 @@ def get_job_offer_stats(db: Session = Depends(get_db1)):
     try:
         # Requêtes SQL
         queries = {
-            "pct_cdi": """
-                SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE contract_type = 'CDI') / COUNT(*), 2) AS pct_cdi
+            "pourcentage_cdi": """
+                SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE contract_type = 'CDI') / COUNT(*), 2) AS pourcentage_cdi
                 FROM jm_job;
             """,
-            "pct_contract_nature": """
-                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE contract_nature = 'Contrat d’apprentissage') / (SELECT COUNT(*) FROM jm_job), 2) AS pct_contract_nature;
+            "pourcentage_contract_nature": """
+                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE contract_nature = 'Contrat apprentissage') / (SELECT COUNT(*) FROM jm_job), 2) AS pourcentage_contract_nature;
             """,
-            "pct_experience_exigee": """
-                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE experience_required = 'E') / (SELECT COUNT(*) FROM jm_job), 2) AS pct_experience_exigee;
+            "pourcentage_experience_exigee": """
+                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE experience_required = 'E') / (SELECT COUNT(*) FROM jm_job), 2) AS pourcentage_experience_exigee;
             """,
             "months_experience_median": """
                 SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY experience_required_months) AS months_experience_median
                 FROM jm_job
                 WHERE experience_required_months IS NOT NULL;
             """,
-            "pct_debutants": """
-                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE experience_required IN ('D')) / (SELECT COUNT(*) FROM jm_job), 2) AS pct_debutants;
+            "pourcentage_debutants": """
+                SELECT ROUND(100.0 * (SELECT COUNT(*) FROM jm_job WHERE experience_required IN ('D')) / (SELECT COUNT(*) FROM jm_job), 2) AS pourcentage_debutants;
             """,
             "mean_salary": """
                 SELECT ROUND(AVG(calculated_salary), 2) AS mean_salary
@@ -95,13 +95,15 @@ def get_job_offer_stats(db: Session = Depends(get_db1)):
             "new_offres_today": """
                 SELECT COUNT(*) AS new_offres_today
                 FROM jm_job
-                WHERE DATE(date_creation) = CURRENT_DATE;
+                WHERE DATE(date_creation) = CURRENT_DATE-1;
             """,
             "max_salary_region": """
-                SELECT j.calculated_salary AS max_salary, p.departement AS max_salary_region
+                SELECT round(AVG(j.calculated_salary),0) AS max_salary, p.departement AS max_salary_region
                 FROM jm_job j
                 JOIN jm_code_postaux p ON j.code_postal = p.code_postal
-                ORDER BY j.calculated_salary DESC
+                WHERE contract_label = 'CDI'
+                GROUP BY departement
+                ORDER BY AVG(j.calculated_salary) DESC
                 LIMIT 1;
             """
         }
@@ -117,13 +119,13 @@ def get_job_offer_stats(db: Session = Depends(get_db1)):
         # Récupérer max_salary et max_salary_region séparément
         max_salary_region_result = db.execute(text(queries["max_salary_region"])).fetchone()
         if max_salary_region_result:
-            data_dict["max_salary"] = max_salary_region_result["max_salary"]
-            data_dict["max_salary_region"] = max_salary_region_result["max_salary_region"]
+            data_dict["max_salary_r"] = max_salary_region_result[0]
+            data_dict["max_salary_region"] = max_salary_region_result[1]
         else:
-            data_dict["max_salary"] = None
+            data_dict["max_salary_r"] = None
             data_dict["max_salary_region"] = None
         # Créez un DataFrame avec une seule ligne
         df = pd.DataFrame([data_dict])
-        return {"status": "success", "data": df.to_dict(orient="records")}
+        return {"status": "success", "data": data_dict} # df.to_dict(orient="records")
     except Exception as e:
         return {"detail": f"Erreur : {str(e)}"}

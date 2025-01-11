@@ -5,3 +5,7 @@ requests
 joblib
 scikit-learn
 python-dotenv
+uvicorn
+fastapi
+sqlalchemy
+psycopg2
