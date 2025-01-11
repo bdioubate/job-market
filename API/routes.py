@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from database import get_db1, get_db2
-import pandas as pd
 
 
 # Initialiser le routeur
@@ -125,7 +124,6 @@ def get_job_offer_stats(db: Session = Depends(get_db1)):
             data_dict["max_salary_r"] = None
             data_dict["max_salary_region"] = None
         # Créez un DataFrame avec une seule ligne
-        df = pd.DataFrame([data_dict])
         return {"status": "success", "data": data_dict} # df.to_dict(orient="records")
     except Exception as e:
         return {"detail": f"Erreur : {str(e)}"}
