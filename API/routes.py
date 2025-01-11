@@ -23,3 +23,28 @@ def get_custom_data(db: Session = Depends(get_db)):
         return data
     except Exception as e:
         return {"detail": f"Erreur : {str(e)}"}
+    
+
+# Route pour récupérer les métriques du modèle
+@router.get(
+    "/metrics",
+    tags=["Metrics"],
+    summary="Récupère les métriques du modèle entraîné"
+)
+def get_metrics_data(db: Session = Depends(get_db)):
+    """
+    Effectue une requête SQL pour récupérer les métriques du modèle entraîné.
+    """
+    query = """
+        SELECT *
+        FROM metrics;
+    """
+    try:
+        # Exécuter la requête
+        results = db.execute(text(query))
+        # Transformer les résultats en une liste de dictionnaires
+        data = [row._mapping for row in results]
+        return {"status": "success", "data": data}
+    except Exception as e:
+        return {"detail": f"Erreur : {str(e)}"}
+
