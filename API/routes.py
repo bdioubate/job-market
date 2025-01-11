@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from database import get_db  # Importer la session de la base de données
+from database import get_db1, get_db2
+
 
 # Initialiser le routeur
 router = APIRouter()
 
 @router.get("/custom_query", tags=["Custom Queries"], summary="Récupère les données enrichies")
-def get_custom_data(db: Session = Depends(get_db)):
+def get_custom_data(db: Session = Depends(get_db1)):
     query = """
         SELECT rome_code, A.rome_label, contract_type, experience_required,
                experience_required_months, departement, A.code_postal,
@@ -31,7 +32,7 @@ def get_custom_data(db: Session = Depends(get_db)):
     tags=["Metrics"],
     summary="Récupère les métriques du modèle entraîné"
 )
-def get_metrics_data(db: Session = Depends(get_db)):
+def get_metrics_data(db: Session = Depends(get_db2)):
     """
     Effectue une requête SQL pour récupérer les métriques du modèle entraîné.
     """
