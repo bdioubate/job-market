@@ -12,7 +12,7 @@ def get_custom_data(db: Session = Depends(get_db1)):
     query = """
         SELECT rome_code, A.rome_label, contract_type, experience_required,
                experience_required_months, departement, A.code_postal,
-               date_creation, calculated_salary, geopoint
+               date_creation, calculated_salary, _geopoint
         FROM jm_job A
         LEFT JOIN jm_rome B ON A.rome_label = B.rome_label
         LEFT JOIN jm_code_postaux C ON A.code_postal = C.code_postal;
