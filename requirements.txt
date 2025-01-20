@@ -5,7 +5,6 @@ requests
 joblib
 scikit-learn
 python-dotenv
-uvicorn
-fastapi
-sqlalchemy
-psycopg2
+dill
+matplotlib
+seaborn
