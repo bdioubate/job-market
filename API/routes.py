@@ -15,7 +15,8 @@ def get_custom_data(db: Session = Depends(get_db1)):
                date_creation, calculated_salary, _geopoint
         FROM jm_job A
         LEFT JOIN jm_rome B ON A.rome_label = B.rome_label
-        LEFT JOIN jm_code_postaux C ON A.code_postal = C.code_postal;
+        LEFT JOIN jm_code_postaux C ON A.code_postal = C.code_postal
+        WHERE calculated_salary < 90000;
     """
     try:
         results = db.execute(text(query))

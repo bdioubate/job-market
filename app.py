@@ -201,11 +201,11 @@ def plot_salary_by_experience(data):
 
 def plot_offers_by_region(data):
     # Limiter aux 20 départements avec le plus d'offres
-    region_data = data['departement'].value_counts().head(20).reset_index()
+    region_data = data['departement'].value_counts().head(10).reset_index()
     region_data.columns = ['Département', 'Nombre d\'Offres']
     fig, ax = plt.subplots(figsize=(12, 8))
     sns.barplot(x='Nombre d\'Offres', y='Département', data=region_data, ax=ax)
-    ax.set_title("Répartition des Offres par Département (Top 20)")
+    ax.set_title("Répartition des Offres par Département (Top 10)")
     ax.set_xlabel("Nombre d'Offres")
     ax.set_ylabel("Département")
     st.pyplot(fig)
