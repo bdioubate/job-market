@@ -13,3 +13,5 @@ __pycache__/
 # Caches et fichiers générés
 *.pyc
 *.pyo
+
+app_future.py
