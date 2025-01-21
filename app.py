@@ -271,7 +271,7 @@ def main():
 
 
     st.write("### Vague de Salaires : Fréquence en Chiffres")
-    plot_salary_distribution(cleaned_data)  # Distribution globale des salaires
+    plot_salary_distribution(cleaned_data) # Distribution globale des salaires
 
     st.write("### Contrats en Compétition")
     plot_salary_by_contract_type(cleaned_data)  # Distribution des salaires par type de contrat
