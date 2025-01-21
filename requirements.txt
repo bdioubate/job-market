@@ -9,3 +9,4 @@ dill
 matplotlib
 seaborn
 folium
+streamlit-folium
