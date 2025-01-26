@@ -7,8 +7,12 @@ from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import seaborn as sns
 import folium
-from streamlit_folium import folium_static
+#from streamlit_folium import folium_static
 from datetime import datetime, date, timedelta
+from streamlit_folium import st_folium
+
+
+
 
 
 # Charger les variables d'environnement
@@ -168,7 +172,9 @@ def extract_lat_long(df, geopoint_col='_geopoint'):
     """
     Extrait les coordonnées latitude et longitude de la colonne '_geopoint' et les ajoute comme nouvelles colonnes.
     """
-    df[['latitude', 'longitude']] = df[geopoint_col].str.split(',', expand=True).astype(float)
+    #df.loc[:, ['latitude', 'longitude']] = df[geopoint_col].str.split(',', expand=True).astype(float)
+    df = df.copy()
+    df[['latitude', 'longitude']] = df['_geopoint'].str.split(',', expand=True).astype(float)
     return df
 
 def plot_map(data):
@@ -194,7 +200,8 @@ def plot_map(data):
         ).add_to(m)
 
     # Afficher la carte avec folium_static
-    folium_static(m)
+    st_folium(m, returned_objects=[])
+    #folium_static(m)
 
 def plot_salary_by_contract_type(data):
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -279,11 +286,12 @@ def main():
     st.write("### Niveau de Richesse par Expérience")
     plot_salary_by_experience(cleaned_data)  # Distribution des salaires par expérience requise
 
-    st.write("### Répartition des Offres par Département")
-    plot_offers_by_region(cleaned_data)  # Répartition des offres par département
+    #st.write("### Répartition des Offres par Département")
+    #plot_offers_by_region(cleaned_data)  # Répartition des offres par département
 
     st.write("### Tour de France des Offres d'Emploi")
     plot_map(cleaned_data)  # Carte des offres
+
 
 
 
@@ -388,7 +396,7 @@ def main():
 
         # RMSE - Bar Plot
         fig2, ax2 = plt.subplots(figsize=(10, 6))
-        sns.barplot(data=metrics_data, x='date_creation', y='rmse', palette="viridis", ax=ax2)
+        sns.barplot(data=metrics_data, x='date_creation', y='rmse', ax=ax2)
         ax2.set_title("Évolution de la RMSE (Root Mean Squared Error)", fontsize=16, color="#ff7f0e")
         ax2.set_xlabel("Date", fontsize=12)
         ax2.set_ylabel("RMSE", fontsize=12)
