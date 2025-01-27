@@ -168,14 +168,32 @@ def filter_offres_du_jour(data):
     offres_du_jour = data[data['date_creation'] == today]
     return offres_du_jour
 
+
 def extract_lat_long(df, geopoint_col='_geopoint'):
     """
     Extrait les coordonnées latitude et longitude de la colonne '_geopoint' et les ajoute comme nouvelles colonnes.
+    Gère les valeurs manquantes ou mal formatées.
     """
-    #df.loc[:, ['latitude', 'longitude']] = df[geopoint_col].str.split(',', expand=True).astype(float)
     df = df.copy()
-    df[['latitude', 'longitude']] = df['_geopoint'].str.split(',', expand=True).astype(float)
+
+    # Vérifier si la colonne `_geopoint` existe
+    if geopoint_col not in df.columns:
+        st.error(f"La colonne '{geopoint_col}' est absente des données.")
+        st.stop()
+
+    # Gérer les valeurs manquantes ou mal formatées
+    df[geopoint_col] = df[geopoint_col].fillna("")  # Remplacer les valeurs NaN par des chaînes vides
+    df[['latitude', 'longitude']] = df[geopoint_col].str.split(',', expand=True)
+
+    # Convertir les colonnes latitude et longitude en float, gérer les erreurs
+    for col in ['latitude', 'longitude']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')  # Convertir en float, NaN pour les valeurs invalides
+
+    # Supprimer les lignes avec des coordonnées manquantes ou invalides
+    df = df.dropna(subset=['latitude', 'longitude'])
+
     return df
+
 
 def plot_map(data):
     """
